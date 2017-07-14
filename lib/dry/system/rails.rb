@@ -7,6 +7,8 @@ module Dry
       extend Dry::Configurable
 
       setting :auto_register, []
+      setting :load_paths, %w(lib app app/models)
+      setting :default_namespace, ''
 
       def self.configure
         super
@@ -20,14 +22,17 @@ module Dry
 
       def self.create_container(defaults)
         auto_register = defaults.auto_register
+        load_paths = defaults.load_paths
+        default_namespace = defaults.default_namespace
 
         container = Class.new(Dry::System::Container).configure do |config|
           config.root = ::Rails.root
           config.system_dir = config.root.join('config/system')
+          config.default_namespace = default_namespace
           config.auto_register = auto_register
         end
 
-        container.load_paths!('lib', 'app', 'app/models')
+        container.load_paths!(*load_paths)
       end
 
       class Railtie < ::Rails::Railtie
